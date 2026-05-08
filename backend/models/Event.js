@@ -28,6 +28,11 @@ const eventSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+
+    qrCode: {
+      type: String,
+      default: "",
+    },
   },
   {
     timestamps: true,

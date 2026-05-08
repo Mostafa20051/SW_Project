@@ -4,9 +4,10 @@ import {
   markAttendance,
   getEventAttendance,
   getMyAttendance,
+  scanQRCodeAttendance,
 } from "../controllers/attendanceController.js";
 
-import { protect } from "../middleware/authMiddleware.js";
+import { protect, authorizeRoles } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -33,8 +34,42 @@ const router = express.Router();
  *     responses:
  *       201:
  *         description: Attendance marked successfully
+ *       400:
+ *         description: Attendance already marked or missing event ID
+ *       404:
+ *         description: Event not found
  */
 router.post("/mark", protect, markAttendance);
+
+/**
+ * @swagger
+ * /api/attendance/scan:
+ *   post:
+ *     summary: Scan QR and mark attendance
+ *     tags: [Attendance]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - eventId
+ *             properties:
+ *               eventId:
+ *                 type: string
+ *                 example: 69fc55e716d3375227609ce3
+ *     responses:
+ *       201:
+ *         description: Attendance marked successfully via QR
+ *       400:
+ *         description: Attendance already marked or missing event ID
+ *       404:
+ *         description: Event not found
+ */
+router.post("/scan", protect, scanQRCodeAttendance);
 
 /**
  * @swagger
@@ -47,6 +82,8 @@ router.post("/mark", protect, markAttendance);
  *     responses:
  *       200:
  *         description: My attendance records fetched successfully
+ *       401:
+ *         description: Not authorized
  */
 router.get("/my", protect, getMyAttendance);
 
@@ -56,6 +93,8 @@ router.get("/my", protect, getMyAttendance);
  *   get:
  *     summary: Get attendance records for specific event
  *     tags: [Attendance]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: eventId
@@ -63,10 +102,20 @@ router.get("/my", protect, getMyAttendance);
  *         schema:
  *           type: string
  *         description: Event ID
+ *         example: 69fc55e716d3375227609ce3
  *     responses:
  *       200:
  *         description: Event attendance fetched successfully
+ *       401:
+ *         description: Not authorized
+ *       403:
+ *         description: Access denied
  */
-router.get("/event/:eventId", getEventAttendance);
+router.get(
+  "/event/:eventId",
+  protect,
+  authorizeRoles("admin", "organizer"),
+  getEventAttendance
+);
 
 export default router;
