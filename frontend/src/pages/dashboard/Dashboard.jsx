@@ -4,7 +4,48 @@ import {
   XCircle
 } from "lucide-react"
 
+import { useEffect, useState } from "react"
+
+import axios from "axios"
+
 function Dashboard() {
+
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalAttendance: 0,
+    totalEvents: 0,
+  })
+
+  useEffect(() => {
+
+    const fetchStats = async () => {
+
+      try {
+
+        const token = localStorage.getItem("token")
+
+        const response = await axios.get(
+          "http://localhost:5000/api/dashboard/stats",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+
+        setStats(response.data)
+
+      } catch (error) {
+
+        console.log(error)
+
+      }
+
+    }
+
+    fetchStats()
+
+  }, [])
 
   return (
 
@@ -27,11 +68,11 @@ function Dashboard() {
           <div>
 
             <h2 className="text-gray-500 mb-2">
-              Total Students
+              Total Users
             </h2>
 
             <p className="text-5xl font-bold text-blue-600">
-              120
+              {stats.totalUsers}
             </p>
 
           </div>
@@ -45,16 +86,19 @@ function Dashboard() {
           <div>
 
             <h2 className="text-gray-500 mb-2">
-              Present Today
+              Total Attendance
             </h2>
 
             <p className="text-5xl font-bold text-green-600">
-              98
+              {stats.totalAttendance}
             </p>
 
           </div>
 
-          <ClipboardCheck size={55} className="text-green-500" />
+          <ClipboardCheck
+            size={55}
+            className="text-green-500"
+          />
 
         </div>
 
@@ -63,104 +107,21 @@ function Dashboard() {
           <div>
 
             <h2 className="text-gray-500 mb-2">
-              Absent Today
+              Total Events
             </h2>
 
             <p className="text-5xl font-bold text-red-600">
-              22
+              {stats.totalEvents}
             </p>
 
           </div>
 
-          <XCircle size={55} className="text-red-500" />
+          <XCircle
+            size={55}
+            className="text-red-500"
+          />
 
         </div>
-
-      </div>
-
-      {/* Recent Attendance */}
-
-      <div className="bg-white rounded-2xl shadow-md p-8">
-
-        <h2 className="text-4xl font-bold mb-8">
-          Recent Attendance
-        </h2>
-
-        <table className="w-full">
-
-          <thead>
-
-            <tr className="border-b">
-
-              <th className="text-left py-4">
-                Name
-              </th>
-
-              <th className="text-left py-4">
-                Status
-              </th>
-
-              <th className="text-left py-4">
-                Time
-              </th>
-
-            </tr>
-
-          </thead>
-
-          <tbody>
-
-            <tr className="border-b">
-
-              <td className="py-5">
-                Ahmad Ali
-              </td>
-
-              <td className="text-green-600 font-semibold">
-                Present
-              </td>
-
-              <td>
-                09:00 AM
-              </td>
-
-            </tr>
-
-            <tr className="border-b">
-
-              <td className="py-5">
-                Sara Mohammad
-              </td>
-
-              <td className="text-red-600 font-semibold">
-                Absent
-              </td>
-
-              <td>
-                ---
-              </td>
-
-            </tr>
-
-            <tr>
-
-              <td className="py-5">
-                Mostafa Khaled
-              </td>
-
-              <td className="text-green-600 font-semibold">
-                Present
-              </td>
-
-              <td>
-                09:12 AM
-              </td>
-
-            </tr>
-
-          </tbody>
-
-        </table>
 
       </div>
 

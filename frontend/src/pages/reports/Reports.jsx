@@ -1,42 +1,78 @@
+import { useEffect, useState } from "react"
+
+import axios from "axios"
+
 function Reports() {
+
+  const [events, setEvents] = useState([])
+
+  useEffect(() => {
+
+    const fetchEvents = async () => {
+
+      try {
+
+        const token = localStorage.getItem("token")
+
+        const response = await axios.get(
+          "http://localhost:5000/api/events",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+
+        setEvents(response.data)
+
+      } catch (error) {
+
+        console.log(error)
+
+      }
+
+    }
+
+    fetchEvents()
+
+  }, [])
 
   return (
 
     <>
 
       <h1 className="text-5xl font-bold mb-2">
-        Reports
+        Events
       </h1>
 
       <p className="text-gray-500 mb-10">
-        Attendance reports and analytics
+        All available events
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-        <div className="bg-white p-8 rounded-2xl shadow-md">
+        {Array.isArray(events) && events.map((event) => (
 
-          <h2 className="text-2xl font-bold mb-4">
-            Weekly Report
-          </h2>
+          <div
+            key={event._id}
+            className="bg-white p-8 rounded-2xl shadow-md"
+          >
 
-          <p className="text-gray-500">
-            View weekly attendance statistics and charts.
-          </p>
+            <h2 className="text-2xl font-bold mb-4">
+              {event.title}
+            </h2>
 
-        </div>
+            <p className="text-gray-500 mb-3">
+              {event.description}
+            </p>
 
-        <div className="bg-white p-8 rounded-2xl shadow-md">
+            <p className="text-sm text-gray-400">
+              {new Date(event.date).toLocaleDateString()}
+            </p>
 
-          <h2 className="text-2xl font-bold mb-4">
-            Monthly Report
-          </h2>
+          </div>
 
-          <p className="text-gray-500">
-            Analyze monthly attendance performance.
-          </p>
-
-        </div>
+        ))}
 
       </div>
 

@@ -11,6 +11,10 @@ import Attendance from "./pages/attendance/Attendance"
 import Reports from "./pages/reports/Reports"
 import Settings from "./pages/settings/Settings"
 
+import CreateEvent from "./pages/events/CreateEvent"
+
+import ProtectedRoute from "./routes/ProtectedRoute"
+
 import DashboardLayout from "./layouts/DashboardLayout"
 
 function App() {
@@ -21,7 +25,8 @@ function App() {
     "/dashboard",
     "/attendance",
     "/reports",
-    "/settings"
+    "/settings",
+    "/create-event"
   ]
 
   return (
@@ -38,17 +43,40 @@ function App() {
 
         <Route path="/register" element={<Register />} />
 
-        {/* Dashboard Layout */}
+        {/* Protected Dashboard */}
 
-        <Route element={<DashboardLayout />}>
+        <Route
+          element={
+            <ProtectedRoute>
+              <DashboardLayout />
+            </ProtectedRoute>
+          }
+        >
 
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route
+            path="/dashboard"
+            element={<Dashboard />}
+          />
 
-          <Route path="/attendance" element={<Attendance />} />
+          <Route
+            path="/attendance"
+            element={<Attendance />}
+          />
 
-          <Route path="/reports" element={<Reports />} />
+          <Route
+            path="/reports"
+            element={<Reports />}
+          />
 
-          <Route path="/settings" element={<Settings />} />
+          <Route
+            path="/settings"
+            element={<Settings />}
+          />
+
+          <Route
+            path="/create-event"
+            element={<CreateEvent />}
+          />
 
         </Route>
 
