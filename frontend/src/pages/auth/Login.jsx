@@ -38,10 +38,16 @@ function Login() {
 
       const data = await loginUser(formData)
 
-      localStorage.setItem("token", data.token)
+      localStorage.setItem(
+        "token",
+        data.token
+      )
 
-      localStorage.setItem("user", JSON.stringify(data))
-      
+      localStorage.setItem(
+        "user",
+        JSON.stringify(data.user)
+      )
+
       console.log(data)
 
       navigate("/dashboard")

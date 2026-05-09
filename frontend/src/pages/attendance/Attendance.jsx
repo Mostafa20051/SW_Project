@@ -1,159 +1,140 @@
+import { useState } from "react"
+
+import axios from "axios"
+
+import toast from "react-hot-toast"
+
 import {
-  Search,
   QrCode,
-  CheckCircle,
-  XCircle
+  CheckCircle
 } from "lucide-react"
+
+import { Scanner } from "@yudiel/react-qr-scanner"
 
 function Attendance() {
 
-  const students = [
-    {
-      id: 1,
-      name: "Ahmad Ali",
-      status: "Present",
-      time: "09:00 AM"
-    },
-    {
-      id: 2,
-      name: "Sara Mohammad",
-      status: "Absent",
-      time: "---"
-    },
-    {
-      id: 3,
-      name: "Mostafa Khaled",
-      status: "Present",
-      time: "09:12 AM"
+  const [scanning, setScanning] = useState(false)
+
+  const [isProcessing, setIsProcessing] = useState(false)
+
+  const handleScan = async (result) => {
+
+    if (!result || isProcessing) return
+
+    try {
+
+      setIsProcessing(true)
+
+      const token = localStorage.getItem("token")
+
+      const eventId = result[0].rawValue
+
+      const response = await axios.post(
+        "http://localhost:5000/api/attendance/scan",
+        {
+          eventId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      toast.success(response.data.message)
+
+      setScanning(false)
+
+    } catch (error) {
+
+      console.log(error)
+
+      toast.error(
+        error.response?.data?.message ||
+        "Failed to mark attendance"
+      )
+
+      setScanning(false)
+
+    } finally {
+
+      setIsProcessing(false)
+
     }
-  ]
+
+  }
 
   return (
 
-    <>
+    <div>
 
-      <div className="flex items-center justify-between mb-10">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-10">
 
         <div>
 
           <h1 className="text-5xl font-bold mb-2">
-            Attendance
+            QR Attendance
           </h1>
 
           <p className="text-gray-500">
-            Manage student attendance
+            Scan QR code for attendance
           </p>
 
         </div>
 
-        <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-2xl flex items-center gap-3 transition">
+        <button
+          onClick={() => setScanning(!scanning)}
+          className={`px-6 py-4 rounded-2xl flex items-center justify-center gap-3 text-white transition
+          ${
+            scanning
+              ? "bg-red-500 hover:bg-red-600"
+              : "bg-blue-600 hover:bg-blue-700"
+          }`}
+        >
 
           <QrCode size={24} />
 
-          Scan QR
+          {scanning
+            ? "Stop Scanner"
+            : "Start Scanner"}
 
         </button>
 
       </div>
 
-      {/* Search */}
+      <div className="bg-white p-6 md:p-10 rounded-3xl shadow-md">
 
-      <div className="bg-white rounded-2xl shadow-md p-5 mb-10 flex items-center gap-4">
+        {scanning ? (
 
-        <Search className="text-gray-400" />
+          <div className="overflow-hidden rounded-3xl">
 
-        <input
-          type="text"
-          placeholder="Search student..."
-          className="w-full outline-none"
-        />
+            <Scanner
+              onScan={handleScan}
+              onError={(error) => console.log(error)}
+            />
 
-      </div>
+          </div>
 
-      {/* Table */}
+        ) : (
 
-      <div className="bg-white rounded-2xl shadow-md overflow-hidden">
+          <div className="flex flex-col items-center justify-center py-20 text-gray-500">
 
-        <table className="w-full">
+            <CheckCircle
+              size={60}
+              className="mb-5 text-gray-300"
+            />
 
-          <thead className="bg-gray-50">
+            <p className="text-xl">
+              Scanner stopped
+            </p>
 
-            <tr>
+          </div>
 
-              <th className="text-left p-6">
-                Student Name
-              </th>
-
-              <th className="text-left p-6">
-                Status
-              </th>
-
-              <th className="text-left p-6">
-                Time
-              </th>
-
-              <th className="text-left p-6">
-                Action
-              </th>
-
-            </tr>
-
-          </thead>
-
-          <tbody>
-
-            {students.map((student) => (
-
-              <tr
-                key={student.id}
-                className="border-t"
-              >
-
-                <td className="p-6">
-                  {student.name}
-                </td>
-
-                <td
-                  className={`p-6 font-semibold ${
-                    student.status === "Present"
-                      ? "text-green-600"
-                      : "text-red-600"
-                  }`}
-                >
-                  {student.status}
-                </td>
-
-                <td className="p-6">
-                  {student.time}
-                </td>
-
-                <td className="p-6 flex gap-4">
-
-                  <button className="bg-green-100 p-3 rounded-xl hover:bg-green-200 transition">
-
-                    <CheckCircle className="text-green-600" />
-
-                  </button>
-
-                  <button className="bg-red-100 p-3 rounded-xl hover:bg-red-200 transition">
-
-                    <XCircle className="text-red-600" />
-
-                  </button>
-
-                </td>
-
-              </tr>
-
-            ))}
-
-          </tbody>
-
-        </table>
+        )}
 
       </div>
 
-    </>
+    </div>
 
   )
 }

@@ -1,18 +1,47 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import axios from "axios"
 
+import toast from "react-hot-toast"
+
+import {
+  Type,
+  FileText,
+  MapPin,
+  Calendar
+} from "lucide-react"
+
 function CreateEvent() {
+
+  const editEvent = JSON.parse(
+    localStorage.getItem("editEvent")
+  )
 
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     date: "",
+    location: "",
   })
 
   const [loading, setLoading] = useState(false)
 
-  const [message, setMessage] = useState("")
+  useEffect(() => {
+
+    if (editEvent) {
+
+      setFormData({
+        title: editEvent.title || "",
+        description: editEvent.description || "",
+        date: editEvent.date
+          ? editEvent.date.split("T")[0]
+          : "",
+        location: editEvent.location || "",
+      })
+
+    }
+
+  }, [])
 
   const handleChange = (e) => {
 
@@ -29,37 +58,56 @@ function CreateEvent() {
 
     setLoading(true)
 
-    setMessage("")
-
     try {
 
       const token = localStorage.getItem("token")
 
-      await axios.post(
-        "http://localhost:5000/api/events",
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      )
+      if (editEvent) {
 
-      setMessage("Event created successfully")
+        await axios.put(
+          `http://localhost:5000/api/events/${editEvent._id}`,
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+
+        toast.success("Event updated successfully")
+
+        localStorage.removeItem("editEvent")
+
+      } else {
+
+        await axios.post(
+          "http://localhost:5000/api/events",
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+
+        toast.success("Event created successfully")
+
+      }
 
       setFormData({
         title: "",
         description: "",
         date: "",
+        location: "",
       })
 
     } catch (error) {
 
       console.log(error)
 
-      setMessage(
+      toast.error(
         error.response?.data?.message ||
-        "Failed to create event"
+        "Operation failed"
       )
 
     } finally {
@@ -72,62 +120,112 @@ function CreateEvent() {
 
   return (
 
-    <div className="max-w-3xl mx-auto bg-white p-10 rounded-2xl shadow-md">
+    <div className="max-w-4xl mx-auto bg-white p-10 rounded-3xl shadow-md">
 
-      <h1 className="text-5xl font-bold mb-8">
-        Create Event
+      <h1 className="text-5xl font-bold mb-3">
+
+        {editEvent
+          ? "Edit Event"
+          : "Create Event"}
+
       </h1>
 
-      {message && (
+      <p className="text-gray-500 mb-10">
 
-        <div className="mb-6 bg-blue-100 text-blue-700 p-4 rounded-xl">
+        Create and manage university events
 
-          {message}
-
-        </div>
-
-      )}
+      </p>
 
       <form
         onSubmit={handleSubmit}
-        className="space-y-5"
+        className="space-y-6"
       >
 
-        <input
-          type="text"
-          name="title"
-          placeholder="Event Title"
-          value={formData.title}
-          onChange={handleChange}
-          className="w-full border p-4 rounded-xl"
-          required
-        />
+        <div className="relative">
 
-        <textarea
-          name="description"
-          placeholder="Event Description"
-          value={formData.description}
-          onChange={handleChange}
-          className="w-full border p-4 rounded-xl h-40"
-          required
-        />
+          <Type
+            className="absolute left-5 top-5 text-gray-400"
+            size={22}
+          />
 
-        <input
-          type="date"
-          name="date"
-          value={formData.date}
-          onChange={handleChange}
-          className="w-full border p-4 rounded-xl"
-          required
-        />
+          <input
+            type="text"
+            name="title"
+            placeholder="Event Title"
+            value={formData.title}
+            onChange={handleChange}
+            className="w-full border p-5 pl-14 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+
+        </div>
+
+        <div className="relative">
+
+          <FileText
+            className="absolute left-5 top-5 text-gray-400"
+            size={22}
+          />
+
+          <textarea
+            name="description"
+            placeholder="Event Description"
+            value={formData.description}
+            onChange={handleChange}
+            className="w-full border p-5 pl-14 rounded-2xl h-44 outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+
+        </div>
+
+        <div className="relative">
+
+          <MapPin
+            className="absolute left-5 top-5 text-gray-400"
+            size={22}
+          />
+
+          <input
+            type="text"
+            name="location"
+            placeholder="Event Location"
+            value={formData.location}
+            onChange={handleChange}
+            className="w-full border p-5 pl-14 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+
+        </div>
+
+        <div className="relative">
+
+          <Calendar
+            className="absolute left-5 top-5 text-gray-400"
+            size={22}
+          />
+
+          <input
+            type="date"
+            name="date"
+            value={formData.date}
+            onChange={handleChange}
+            className="w-full border p-5 pl-14 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+
+        </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-5 rounded-2xl text-xl font-semibold transition"
         >
 
-          {loading ? "Creating..." : "Create Event"}
+          {loading
+            ? "Processing..."
+            : editEvent
+            ? "Update Event"
+            : "Create Event"}
 
         </button>
 

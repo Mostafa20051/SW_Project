@@ -1,20 +1,28 @@
 import {
   Users,
   ClipboardCheck,
-  XCircle
+  CalendarDays
 } from "lucide-react"
+
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer
+} from "recharts"
 
 import { useEffect, useState } from "react"
 
 import axios from "axios"
 
+import Loader from "../../components/common/Loader"
 function Dashboard() {
 
-  const [stats, setStats] = useState({
-    totalUsers: 0,
-    totalAttendance: 0,
-    totalEvents: 0,
-  })
+  const [stats, setStats] = useState(null)
+
+  const user = JSON.parse(localStorage.getItem("user"))
 
   useEffect(() => {
 
@@ -33,7 +41,7 @@ function Dashboard() {
           }
         )
 
-        setStats(response.data)
+        setStats(response.data.stats)
 
       } catch (error) {
 
@@ -47,6 +55,25 @@ function Dashboard() {
 
   }, [])
 
+  if (!stats) {
+    return <Loader />
+  }
+
+  const chartData = [
+    {
+      name: "Users",
+      total: stats.totalUsers,
+    },
+    {
+      name: "Attendance",
+      total: stats.totalAttendance,
+    },
+    {
+      name: "Events",
+      total: stats.totalEvents,
+    },
+  ]
+
   return (
 
     <>
@@ -55,15 +82,25 @@ function Dashboard() {
         Dashboard
       </h1>
 
-      <p className="text-gray-500 mb-10">
+      <p className="text-gray-500 mb-5">
         Welcome back to SmartAttend System
       </p>
 
-      {/* Cards */}
+      <div className="bg-white p-6 rounded-3xl shadow-md mb-10 border border-gray-100">
+
+        <h2 className="text-2xl font-bold text-gray-700">
+          Welcome, {user?.name}
+        </h2>
+
+        <p className="text-gray-500 mt-2">
+          Role: {user?.role || "attendee"}
+        </p>
+
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
 
-        <div className="bg-white p-6 rounded-2xl shadow-md flex items-center justify-between">
+        <div className="bg-white p-6 rounded-3xl shadow-md hover:shadow-xl hover:-translate-y-1 transition duration-300 border border-gray-100 flex items-center justify-between">
 
           <div>
 
@@ -77,11 +114,14 @@ function Dashboard() {
 
           </div>
 
-          <Users size={55} className="text-blue-500" />
+          <Users
+            size={55}
+            className="text-blue-500"
+          />
 
         </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow-md flex items-center justify-between">
+        <div className="bg-white p-6 rounded-3xl shadow-md hover:shadow-xl hover:-translate-y-1 transition duration-300 border border-gray-100 flex items-center justify-between">
 
           <div>
 
@@ -102,7 +142,7 @@ function Dashboard() {
 
         </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow-md flex items-center justify-between">
+        <div className="bg-white p-6 rounded-3xl shadow-md hover:shadow-xl hover:-translate-y-1 transition duration-300 border border-gray-100 flex items-center justify-between">
 
           <div>
 
@@ -116,10 +156,41 @@ function Dashboard() {
 
           </div>
 
-          <XCircle
+          <CalendarDays
             size={55}
             className="text-red-500"
           />
+
+        </div>
+
+      </div>
+
+      <div className="bg-white p-8 rounded-3xl shadow-md border border-gray-100">
+
+        <h2 className="text-3xl font-bold mb-8">
+          System Analytics
+        </h2>
+
+        <div className="w-full h-96">
+
+          <ResponsiveContainer width="100%" height="100%">
+
+            <BarChart data={chartData}>
+
+              <XAxis dataKey="name" />
+
+              <YAxis />
+
+              <Tooltip />
+
+              <Bar
+                dataKey="total"
+                radius={[10, 10, 0, 0]}
+              />
+
+            </BarChart>
+
+          </ResponsiveContainer>
 
         </div>
 

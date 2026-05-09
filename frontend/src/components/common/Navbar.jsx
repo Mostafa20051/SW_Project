@@ -4,32 +4,28 @@ function Navbar() {
 
   return (
 
-    <nav className="bg-black text-white px-8 py-5 flex justify-between items-center shadow-md">
+    <nav className="bg-black text-white px-5 md:px-10 py-5 flex items-center justify-between">
 
-      <h1 className="text-3xl font-bold text-blue-500">
+      <Link
+        to="/"
+        className="text-3xl md:text-5xl font-bold text-blue-500"
+      >
+
         SmartAttend
-      </h1>
 
-      <div className="space-x-8 text-lg font-medium">
+      </Link>
 
-        <Link
-          to="/"
-          className="hover:text-blue-400 transition"
-        >
+      <div className="flex items-center gap-4 md:gap-8 text-sm md:text-2xl font-semibold">
+
+        <Link to="/">
           Home
         </Link>
 
-        <Link
-          to="/login"
-          className="hover:text-blue-400 transition"
-        >
+        <Link to="/login">
           Login
         </Link>
 
-        <Link
-          to="/register"
-          className="hover:text-blue-400 transition"
-        >
+        <Link to="/register">
           Register
         </Link>
 

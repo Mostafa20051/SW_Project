@@ -1,56 +1,150 @@
+import { useEffect, useState } from "react"
+
+import axios from "axios"
+import Loader from "../../components/common/Loader"
 function Settings() {
+
+  const [attendance, setAttendance] = useState([])
+
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+
+    const fetchAttendance = async () => {
+
+      try {
+
+        const token = localStorage.getItem("token")
+
+        const response = await axios.get(
+          "http://localhost:5000/api/attendance/my",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+
+        setAttendance(response.data.attendance || [])
+
+      } catch (error) {
+
+        console.log(error)
+
+      } finally {
+
+        setLoading(false)
+
+      }
+
+    }
+
+    fetchAttendance()
+
+  }, [])
 
   return (
 
-    <>
+    <div>
 
       <h1 className="text-5xl font-bold mb-2">
-        Settings
+        My Attendance
       </h1>
 
       <p className="text-gray-500 mb-10">
-        Manage your system settings
+        View your attendance history
       </p>
 
-      <div className="bg-white rounded-2xl shadow-md p-8 space-y-6">
+      {loading ? (
 
-        <div>
+        <Loader />
 
-          <label className="block mb-2 font-semibold">
-            System Name
-          </label>
+      ) : attendance.filter((item) => item.event).length === 0 ? (
 
-          <input
-            type="text"
-            defaultValue="SmartAttend"
-            className="w-full border rounded-xl p-4 outline-none"
-          />
+        <div className="bg-white p-10 rounded-3xl shadow-md text-center border border-gray-100">
 
-        </div>
+          <h2 className="text-2xl font-bold mb-3">
+            No Attendance Records
+          </h2>
 
-        <div>
-
-          <label className="block mb-2 font-semibold">
-            Admin Email
-          </label>
-
-          <input
-            type="email"
-            defaultValue="admin@smartattend.com"
-            className="w-full border rounded-xl p-4 outline-none"
-          />
+          <p className="text-gray-500">
+            Your attendance will appear here.
+          </p>
 
         </div>
 
-        <button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-2xl transition">
+      ) : (
 
-          Save Changes
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-        </button>
+          {attendance
+            .filter((item) => item.event)
+            .map((item) => (
 
-      </div>
+              <div
+                key={item._id}
+                className="
+                  bg-white
+                  border border-gray-100
+                  p-8
+                  rounded-3xl
+                  shadow-md
+                  hover:-translate-y-2
+                  hover:scale-[1.02]
+                  transition
+                  duration-300
+                "
+              >
 
-    </>
+                <h2 className="text-3xl font-bold mb-6 text-gray-800">
+
+                  {item.event?.title}
+
+                </h2>
+
+                <div className="space-y-4 text-gray-600 text-lg">
+
+                  <p>
+                    📍 {item.event?.location}
+                  </p>
+
+                  <p>
+                    📅 {
+                      new Date(
+                        item.event?.date
+                      ).toLocaleDateString()
+                    }
+                  </p>
+
+                  <p>
+                    ⏰ {
+                      new Date(
+                        item.checkInTime
+                      ).toLocaleTimeString()
+                    }
+                  </p>
+
+                  <div className="pt-2">
+
+                    <div className="inline-block bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm font-semibold">
+
+                      ✅ {item.status}
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            ))}
+
+        </div>
+
+      )}
+
+    </div>
 
   )
 }
