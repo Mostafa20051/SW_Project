@@ -9,9 +9,13 @@ import Register from "./pages/auth/Register"
 import Dashboard from "./pages/dashboard/Dashboard"
 import Attendance from "./pages/attendance/Attendance"
 import Reports from "./pages/reports/Reports"
+
 import Settings from "./pages/settings/Settings"
+import MyAttendance from "./pages/settings/MyAttendance"
 
 import CreateEvent from "./pages/events/CreateEvent"
+
+import Users from "./pages/users/Users"
 
 import ProtectedRoute from "./routes/ProtectedRoute"
 
@@ -26,7 +30,9 @@ function App() {
     "/attendance",
     "/reports",
     "/settings",
-    "/create-event"
+    "/create-event",
+    "/users",
+    "/my-attendance"
   ]
 
   return (
@@ -74,8 +80,18 @@ function App() {
           />
 
           <Route
+            path="/my-attendance"
+            element={<MyAttendance />}
+          />
+
+          <Route
             path="/create-event"
             element={<CreateEvent />}
+          />
+
+          <Route
+            path="/users"
+            element={<Users />}
           />
 
         </Route>

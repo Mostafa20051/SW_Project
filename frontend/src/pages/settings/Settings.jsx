@@ -1,148 +1,152 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 import axios from "axios"
-import Loader from "../../components/common/Loader"
+
+import toast from "react-hot-toast"
+
 function Settings() {
 
-  const [attendance, setAttendance] = useState([])
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+  })
 
-  const [loading, setLoading] = useState(true)
+  const user = JSON.parse(localStorage.getItem("user"))
 
-  useEffect(() => {
+  const handlePasswordChange = async (e) => {
 
-    const fetchAttendance = async () => {
+    e.preventDefault()
 
-      try {
+    try {
 
-        const token = localStorage.getItem("token")
+      const token = localStorage.getItem("token")
 
-        const response = await axios.get(
-          "http://localhost:5000/api/attendance/my",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        )
+      const response = await axios.put(
+        "http://localhost:5000/api/users/change-password",
+        passwordData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
 
-        setAttendance(response.data.attendance || [])
+      toast.success(response.data.message)
 
-      } catch (error) {
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+      })
 
-        console.log(error)
+    } catch (error) {
 
-      } finally {
-
-        setLoading(false)
-
-      }
+      toast.error(
+        error.response?.data?.message ||
+        "Failed to change password"
+      )
 
     }
 
-    fetchAttendance()
-
-  }, [])
+  }
 
   return (
 
     <div>
 
       <h1 className="text-5xl font-bold mb-2">
-        My Attendance
+        Account Settings
       </h1>
 
       <p className="text-gray-500 mb-10">
-        View your attendance history
+        Manage your profile settings
       </p>
 
-      {loading ? (
+      {/* PROFILE CARD */}
 
-        <Loader />
+      <div className="bg-white p-8 rounded-3xl shadow-md border border-gray-100 mb-10">
 
-      ) : attendance.filter((item) => item.event).length === 0 ? (
+        <h2 className="text-3xl font-bold mb-6">
+          Profile Information
+        </h2>
 
-        <div className="bg-white p-10 rounded-3xl shadow-md text-center border border-gray-100">
+        <div className="space-y-4 text-lg">
 
-          <h2 className="text-2xl font-bold mb-3">
-            No Attendance Records
-          </h2>
+          <p>
+            👤 <span className="font-semibold">Name:</span> {user?.name}
+          </p>
 
-          <p className="text-gray-500">
-            Your attendance will appear here.
+          <p>
+            📧 <span className="font-semibold">Email:</span> {user?.email}
+          </p>
+
+          <p>
+            🛡️ <span className="font-semibold">Role:</span> {user?.role}
           </p>
 
         </div>
 
-      ) : (
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* CHANGE PASSWORD */}
 
-          {attendance
-            .filter((item) => item.event)
-            .map((item) => (
+      <div className="bg-white p-8 rounded-3xl shadow-md border border-gray-100 mb-10">
 
-              <div
-                key={item._id}
-                className="
-                  bg-white
-                  border border-gray-100
-                  p-8
-                  rounded-3xl
-                  shadow-md
-                  hover:-translate-y-2
-                  hover:scale-[1.02]
-                  transition
-                  duration-300
-                "
-              >
+        <h2 className="text-3xl font-bold mb-6">
+          Change Password
+        </h2>
 
-                <h2 className="text-3xl font-bold mb-6 text-gray-800">
+        <form
+          onSubmit={handlePasswordChange}
+          className="space-y-5"
+        >
 
-                  {item.event?.title}
+          <input
+            type="password"
+            placeholder="Current Password"
+            value={passwordData.currentPassword}
+            onChange={(e) =>
+              setPasswordData({
+                ...passwordData,
+                currentPassword: e.target.value,
+              })
+            }
+            className="w-full border p-4 rounded-2xl"
+            required
+          />
 
-                </h2>
+          <input
+            type="password"
+            placeholder="New Password"
+            value={passwordData.newPassword}
+            onChange={(e) =>
+              setPasswordData({
+                ...passwordData,
+                newPassword: e.target.value,
+              })
+            }
+            className="w-full border p-4 rounded-2xl"
+            required
+          />
 
-                <div className="space-y-4 text-gray-600 text-lg">
+          <button
+            type="submit"
+            className="
+              bg-blue-600
+              hover:bg-blue-700
+              text-white
+              px-6 py-4
+              rounded-2xl
+              transition
+            "
+          >
 
-                  <p>
-                    📍 {item.event?.location}
-                  </p>
+            Update Password
 
-                  <p>
-                    📅 {
-                      new Date(
-                        item.event?.date
-                      ).toLocaleDateString()
-                    }
-                  </p>
+          </button>
 
-                  <p>
-                    ⏰ {
-                      new Date(
-                        item.checkInTime
-                      ).toLocaleTimeString()
-                    }
-                  </p>
+        </form>
 
-                  <div className="pt-2">
-
-                    <div className="inline-block bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm font-semibold">
-
-                      ✅ {item.status}
-
-                    </div>
-
-                  </div>
-
-                </div>
-
-              </div>
-
-            ))}
-
-        </div>
-
-      )}
+      </div>
 
     </div>
 

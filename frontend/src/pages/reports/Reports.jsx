@@ -99,6 +99,37 @@ function Reports() {
 
   }
 
+  const handleRegister = async (eventId) => {
+
+    try {
+
+      const token = localStorage.getItem("token")
+
+      const response = await axios.post(
+        "http://localhost:5000/api/attendance/mark",
+        {
+          eventId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      toast.success(response.data.message)
+
+    } catch (error) {
+
+      toast.error(
+        error.response?.data?.message ||
+        "Registration failed"
+      )
+
+    }
+
+  }
+
   const handleEdit = (event) => {
 
     localStorage.setItem(
@@ -223,12 +254,19 @@ function Reports() {
                   }
                 </p>
 
+                <p>
+                  👥 Capacity: {event.capacity || 100}
+                </p>
+
               </div>
 
               <div className="bg-gray-100 p-6 rounded-3xl flex flex-col items-center mb-6">
 
                 <QRCodeCanvas
-                  value={event._id}
+                  value={JSON.stringify({
+                    eventId: event._id,
+                    title: event.title,
+                  })}
                   size={160}
                 />
 
@@ -243,7 +281,7 @@ function Reports() {
               {(role === "admin" ||
               role === "organizer") && (
 
-                <div className="flex gap-4">
+                <div className="flex gap-4 mb-4">
 
                   <button
                     onClick={() => handleEdit(event)}
@@ -282,6 +320,28 @@ function Reports() {
                   </button>
 
                 </div>
+
+              )}
+
+              {role === "attendee" && (
+
+                <button
+                  onClick={() => handleRegister(event._id)}
+                  className="
+                    w-full
+                    py-3
+                    rounded-2xl
+                    font-semibold
+                    transition
+                    bg-blue-600
+                    hover:bg-blue-700
+                    text-white
+                  "
+                >
+
+                  Register Event
+
+                </button>
 
               )}
 

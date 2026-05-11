@@ -49,8 +49,22 @@ function DashboardLayout() {
         ]
       : []),
 
+    ...(role === "admin"
+      ? [
+          {
+            name: "Users Management",
+            path: "/users"
+          }
+        ]
+      : []),
+
     {
       name: "My Attendance",
+      path: "/my-attendance"
+    },
+
+    {
+      name: "Settings",
       path: "/settings"
     }
   ]

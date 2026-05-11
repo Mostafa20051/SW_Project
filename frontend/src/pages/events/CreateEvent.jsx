@@ -22,6 +22,7 @@ function CreateEvent() {
     description: "",
     date: "",
     location: "",
+    capacity: 100,
   })
 
   const [loading, setLoading] = useState(false)
@@ -37,6 +38,7 @@ function CreateEvent() {
           ? editEvent.date.split("T")[0]
           : "",
         location: editEvent.location || "",
+        capacity: editEvent.capacity || 100,
       })
 
     }
@@ -99,6 +101,7 @@ function CreateEvent() {
         description: "",
         date: "",
         location: "",
+        capacity: 100,
       })
 
     } catch (error) {
@@ -193,6 +196,26 @@ function CreateEvent() {
             onChange={handleChange}
             className="w-full border p-5 pl-14 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500"
             required
+          />
+
+        </div>
+
+        <div className="relative">
+
+          <Type
+            className="absolute left-5 top-5 text-gray-400"
+            size={22}
+          />
+
+          <input
+            type="number"
+            name="capacity"
+            placeholder="Event Capacity"
+            value={formData.capacity}
+            onChange={handleChange}
+            className="w-full border p-5 pl-14 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500"
+            required
+            min="1"
           />
 
         </div>

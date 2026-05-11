@@ -6,7 +6,8 @@ import toast from "react-hot-toast"
 
 import {
   QrCode,
-  CheckCircle
+  CheckCircle,
+  AlertCircle
 } from "lucide-react"
 
 import { Scanner } from "@yudiel/react-qr-scanner"
@@ -17,6 +18,10 @@ function Attendance() {
 
   const [isProcessing, setIsProcessing] = useState(false)
 
+  const [scanResult, setScanResult] = useState(null)
+
+  const [scanError, setScanError] = useState("")
+
   const handleScan = async (result) => {
 
     if (!result || isProcessing) return
@@ -25,9 +30,23 @@ function Attendance() {
 
       setIsProcessing(true)
 
+      setScanError("")
+
       const token = localStorage.getItem("token")
 
-      const eventId = result[0].rawValue
+      let eventId = ""
+
+      try {
+
+        const qrData = JSON.parse(result[0].rawValue)
+
+        eventId = qrData.eventId
+
+      } catch {
+
+        eventId = result[0].rawValue
+
+      }
 
       const response = await axios.post(
         "http://localhost:5000/api/attendance/scan",
@@ -41,6 +60,8 @@ function Attendance() {
         }
       )
 
+      setScanResult(response.data.message)
+
       toast.success(response.data.message)
 
       setScanning(false)
@@ -49,10 +70,13 @@ function Attendance() {
 
       console.log(error)
 
-      toast.error(
+      const errorMessage =
         error.response?.data?.message ||
         "Failed to mark attendance"
-      )
+
+      setScanError(errorMessage)
+
+      toast.error(errorMessage)
 
       setScanning(false)
 
@@ -83,7 +107,11 @@ function Attendance() {
         </div>
 
         <button
-          onClick={() => setScanning(!scanning)}
+          onClick={() => {
+            setScanning(!scanning)
+            setScanResult(null)
+            setScanError("")
+          }}
           className={`px-6 py-4 rounded-2xl flex items-center justify-center gap-3 text-white transition
           ${
             scanning
@@ -112,6 +140,52 @@ function Attendance() {
               onScan={handleScan}
               onError={(error) => console.log(error)}
             />
+
+          </div>
+
+        ) : scanResult ? (
+
+          <div className="flex flex-col items-center justify-center py-20">
+
+            <CheckCircle
+              size={70}
+              className="text-green-500 mb-5"
+            />
+
+            <h2 className="text-3xl font-bold text-green-600 mb-3">
+
+              Attendance Successful
+
+            </h2>
+
+            <p className="text-gray-500 text-lg">
+
+              {scanResult}
+
+            </p>
+
+          </div>
+
+        ) : scanError ? (
+
+          <div className="flex flex-col items-center justify-center py-20">
+
+            <AlertCircle
+              size={70}
+              className="text-red-500 mb-5"
+            />
+
+            <h2 className="text-3xl font-bold text-red-600 mb-3">
+
+              Attendance Failed
+
+            </h2>
+
+            <p className="text-gray-500 text-lg">
+
+              {scanError}
+
+            </p>
 
           </div>
 

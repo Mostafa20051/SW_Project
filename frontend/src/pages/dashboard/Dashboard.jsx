@@ -18,11 +18,15 @@ import { useEffect, useState } from "react"
 import axios from "axios"
 
 import Loader from "../../components/common/Loader"
+
 function Dashboard() {
 
   const [stats, setStats] = useState(null)
 
   const user = JSON.parse(localStorage.getItem("user"))
+
+  const role =
+    user?.role?.toLowerCase().trim()
 
   useEffect(() => {
 
@@ -51,9 +55,68 @@ function Dashboard() {
 
     }
 
-    fetchStats()
+    if (
+      role === "admin" ||
+      role === "organizer"
+    ) {
+      fetchStats()
+    }
 
-  }, [])
+  }, [role])
+
+  // ATTENDEE DASHBOARD
+  if (role === "attendee") {
+
+    return (
+
+      <div>
+
+        <h1 className="text-5xl font-bold mb-2">
+          My Dashboard
+        </h1>
+
+        <p className="text-gray-500 mb-10">
+          Welcome to SmartAttend
+        </p>
+
+        <div className="bg-white p-10 rounded-3xl shadow-md border border-gray-100">
+
+          <h2 className="text-3xl font-bold text-gray-800 mb-4">
+
+            Welcome, {user?.name}
+
+          </h2>
+
+          <p className="text-gray-500 text-lg mb-6">
+
+            Role: {user?.role}
+
+          </p>
+
+          <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6">
+
+            <h3 className="text-2xl font-bold text-blue-700 mb-3">
+
+              SmartAttend System
+
+            </h3>
+
+            <p className="text-gray-600 leading-relaxed">
+
+              You can browse events, scan QR codes,
+              and track your attendance records easily.
+
+            </p>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    )
+
+  }
 
   if (!stats) {
     return <Loader />
@@ -73,6 +136,15 @@ function Dashboard() {
       total: stats.totalEvents,
     },
   ]
+
+  const attendanceRate =
+    stats.totalEvents > 0
+      ? (
+          (stats.totalAttendance /
+            stats.totalEvents) *
+          100
+        ).toFixed(1)
+      : 0
 
   return (
 
@@ -162,6 +234,22 @@ function Dashboard() {
           />
 
         </div>
+
+      </div>
+
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-8 rounded-3xl shadow-lg mb-10">
+
+        <h2 className="text-2xl font-bold mb-3">
+          Attendance Rate
+        </h2>
+
+        <p className="text-6xl font-extrabold">
+          {attendanceRate}%
+        </p>
+
+        <p className="mt-3 text-blue-100">
+          Based on total attendance records
+        </p>
 
       </div>
 
